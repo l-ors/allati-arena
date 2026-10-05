@@ -2,8 +2,12 @@
 <html lang="hu">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
   <title>Állati Aréna</title>
+  <link rel="icon" type="image/png" href="icon.png">
+  <link rel="apple-touch-icon" href="icon.png">
+  <link rel="manifest" href="manifest.json">
+  <meta name="theme-color" content="#8a5a2b">
   <link rel="stylesheet" href="css/style.css">
   <link rel="stylesheet" href="css/shop.css">
   <link rel="stylesheet" href="css/challenges.css">
@@ -17,6 +21,7 @@
       </div>
       <div class="pills">
         <div class="gold-pill trophy-pill"><span class="icon" data-icon="trophy"></span><span id="trophy-amount">0</span></div>
+        <div class="gold-pill gem-pill"><span class="icon" data-icon="gem"></span><span id="gem-amount">120</span></div>
         <div class="gold-pill"><span class="icon" data-icon="gold"></span><span id="gold-amount">0</span></div>
       </div>
     </header>
@@ -58,7 +63,91 @@
           <div class="arena-hint">Kattints az arénára: mit találsz benne?</div>
           <div id="arena-progress" class="arena-progress"></div>
         </div>
-        <button id="btn-fight" class="big-btn">Csata!</button>
+        <button id="btn-fight" class="big-btn">Gyakorló Csata (Bot ellen)</button>
+        <!-- MULTIPLAYER SECTION WITH MODE SWITCH -->
+        <div class="mp-mode-section">
+          <!-- Mode Switch Toggle -->
+          <div class="mp-mode-toggle" id="mp-mode-toggle">
+            <button type="button" class="mp-toggle-btn active" id="btn-toggle-quick" data-mode="quick">
+              <span class="icon" data-icon="search"></span> 🔍 Gyors Meccs
+            </button>
+            <button type="button" class="mp-toggle-btn" id="btn-toggle-code" data-mode="code">
+              <span class="icon" data-icon="lock"></span> 🔑 Kódos Szoba
+            </button>
+          </div>
+
+          <!-- PANEL 1: Quick Match (Search Mode) -->
+          <div class="mp-panel" id="mp-panel-quick">
+            <div class="mp-profile-summary">
+              <div class="mp-cups-badge">
+                <span class="icon" data-icon="trophy"></span>
+                <span class="mp-cups-val" id="mp-player-cups">0</span>
+                <span class="mp-cups-lbl">Kupa</span>
+              </div>
+              <div class="mp-status-pill" id="mp-quick-status-pill">
+                <span class="status-dot connecting" id="mp-quick-dot"></span>
+                <span id="mp-quick-status-txt">Szerver kapcsolat...</span>
+              </div>
+            </div>
+
+            <!-- Idle state: Find Match button -->
+            <div id="mp-search-idle" class="mp-search-view">
+              <button id="btn-find-match" class="big-btn mp-search-btn">
+                <span class="icon" data-icon="battle"></span>
+                <span>🎮 Meccs Keresése</span>
+              </button>
+              <div class="mp-search-hint">Párosítás hasonló kupa szerint (vagy azonnali meccs 2 játékos esetén)</div>
+            </div>
+
+            <!-- Searching state: Radar pulse & Timer -->
+            <div id="mp-search-active" class="mp-search-view hidden">
+              <div class="mp-radar-wrap">
+                <div class="mp-radar-ring ring-1"></div>
+                <div class="mp-radar-ring ring-2"></div>
+                <div class="mp-radar-icon">🐾</div>
+              </div>
+              <div class="mp-search-title">🔍 Ellenfél keresése...</div>
+              <div class="mp-search-timer" id="mp-search-timer">00:00</div>
+              <div class="mp-search-sub" id="mp-search-queue-info">Várakozás a szerveren...</div>
+              <button id="btn-cancel-search" class="action-btn cancel mp-cancel-btn">❌ Mégse</button>
+            </div>
+
+            <!-- Found Opponent Overlay / Banner -->
+            <div id="mp-match-found-banner" class="mp-match-found-banner hidden">
+              <div class="mp-found-badge">⚔️ ELLENFÉL MEGTALÁLVA!</div>
+              <div class="mp-found-players">
+                <div class="mp-player-card my-card">
+                  <span class="name" id="mp-found-my-name">Te</span>
+                  <span class="cups" id="mp-found-my-cups">🏆 0</span>
+                </div>
+                <div class="mp-vs-badge">VS</div>
+                <div class="mp-player-card opp-card">
+                  <span class="name" id="mp-found-opp-name">Ellenfél</span>
+                  <span class="cups" id="mp-found-opp-cups">🏆 0</span>
+                </div>
+              </div>
+              <div class="mp-countdown" id="mp-found-countdown">Indulás 3 másodperc...</div>
+            </div>
+          </div>
+
+          <!-- PANEL 2: Private Room with Code -->
+          <div class="mp-panel hidden" id="mp-panel-code">
+            <div class="mp-lobby-row">
+              <button id="btn-mp-host" class="big-btn mp-lobby-btn"><span class="icon" data-icon="battle"></span> Szoba Nyitás</button>
+              <button id="btn-mp-join" class="big-btn mp-lobby-btn join"><span class="icon" data-icon="users"></span> Csatlakozás</button>
+            </div>
+            <div class="mp-code-hint">Játssz közvetlenül barátoddal egy 4 jegyű szobakóddal!</div>
+          </div>
+
+          <!-- Server connection bar -->
+          <div class="mp-server-bar">
+            <div class="mp-server-status-wrap">
+              <span id="mp-status-indicator" class="status-dot connecting"></span>
+              <span id="mp-status-text">Csatlakozás szerverhez...</span>
+            </div>
+            <button id="btn-mp-server-cfg" class="mp-cfg-btn" title="Szerver cím beállítása">⚙️ Szerver</button>
+          </div>
+        </div>
         <h3 class="chest-title">Ládák</h3>
         <div id="chest-slots" class="chest-slots"></div>
       </section>
@@ -98,6 +187,31 @@
       <div class="modal-box" id="chest-modal-body"></div>
     </div>
 
+    <!-- SERVER CONFIG MODAL -->
+    <div id="server-config-modal" class="modal hidden">
+      <div class="modal-box mp-box">
+        <button class="modal-close" id="btn-server-close">&times;</button>
+        <div class="mp-head">
+          <span class="icon" data-icon="users"></span>
+          <h3>Multiplayer Szerver</h3>
+        </div>
+        <p class="mp-sub">Add meg a szerver WebSocket (WSS/WS) címét. Az APK automatikusan ide kapcsolódik!</p>
+        <div class="mp-input-wrap">
+          <input type="text" id="mp-server-url-input" placeholder="wss://allati-arena.onrender.com" />
+        </div>
+        <div class="mp-presets">
+          <button class="preset-btn" data-url="wss://allati-arena.onrender.com">Render (Alapértelmezett)</button>
+          <button class="preset-btn" data-url="wss://allati-arena.netlify.app/ws">Netlify Proxy</button>
+          <button class="preset-btn" data-url="ws://localhost:3000">Localhost:3000</button>
+        </div>
+        <div id="mp-test-result" class="mp-test-msg"></div>
+        <div class="mp-modal-actions">
+          <button class="big-btn mp-connect-btn" id="btn-server-save">Mentés & Csatlakozás</button>
+          <button class="action-btn cancel" id="btn-server-cancel">Mégse</button>
+        </div>
+      </div>
+    </div>
+
     <!-- BATTLE SCREEN (covers the whole app while fighting) -->
     <div id="battle-screen" class="hidden">
       <div class="canvas-wrap">
@@ -135,6 +249,15 @@
   <script src="js/shop.js"></script>
   <script src="js/members.js"></script>
   <script src="js/challenges.js"></script>
+  <script src="js/chest-animation.js"></script>
+  <script src="js/multiplayer.js"></script>
   <script src="js/ui.js"></script>
+  <script>
+    if ('serviceWorker' in navigator) {
+      window.addEventListener('load', () => {
+        navigator.serviceWorker.register('./sw.js').catch(err => console.log('SW register error:', err));
+      });
+    }
+  </script>
 </body>
 </html>

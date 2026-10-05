@@ -1,0 +1,188 @@
+/* ---------- Challenges (Kihívás) ----------
+   Each challenge is a cream card with a wooden board that holds the two decks,
+   like the deck board on the "Pakli" page. */
+
+.challenge-intro {
+  margin: -6px 0 8px;
+  text-align: center;
+  font-size: 14px;
+  font-weight: bold;
+  opacity: 0.8;
+}
+
+/* Search bar: stays at the top of the page while the list scrolls under it.
+   top: -16px cancels the 16px padding of #content, so it sits right at the edge.
+   The negative side margins make its background cover the whole width. */
+.challenge-search {
+  position: sticky;
+  top: -16px;
+  z-index: 2;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin: 0 -16px 12px;
+  padding: 10px 16px;
+  background: #f3e3bd;   /* same color as the page */
+  border-bottom: 3px solid rgba(90, 53, 21, 0.25);
+}
+.challenge-search input {
+  flex: 1;
+  min-width: 0;
+  padding: 9px 14px;
+  font-family: inherit;
+  font-size: 16px;       /* 16px or more: phones don't zoom in when you tap it */
+  font-weight: bold;
+  color: var(--wood-dark);
+  background: #fffaf0;
+  border: 3px solid var(--wood-dark);
+  border-radius: 14px;
+  box-shadow: inset 0 3px 0 rgba(90, 53, 21, 0.15);
+  outline: none;
+}
+.challenge-search input::placeholder { color: #a08a6a; font-weight: normal; }
+.challenge-search input:focus { border-color: #e8791f; box-shadow: 0 0 0 3px rgba(255, 201, 60, 0.7); }
+.challenge-count { flex: none; font-size: 13px; font-weight: bold; opacity: 0.75; }
+
+/* ---------- The list ---------- */
+.challenge-list { display: flex; flex-direction: column; gap: 14px; padding-bottom: 10px; }
+
+.challenge-card {
+  padding: 10px 12px 12px;
+  background: var(--cream);
+  border: 4px solid var(--wood-dark);
+  border-radius: 16px;
+  box-shadow: 0 5px 0 var(--wood-dark);
+}
+/* Already won: a green card */
+.challenge-card.won {
+  background: #eef6d8;
+  border-color: #2f6a1d;
+  box-shadow: 0 5px 0 #2f6a1d;
+}
+
+/* Top row: name (+ "Teljesítve") on the left, "Harc!" on the right */
+.challenge-head { display: flex; align-items: center; gap: 10px; }
+.challenge-who {
+  flex: 1;
+  min-width: 0;          /* lets a long name shrink instead of pushing the button out */
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 4px 8px;
+}
+.challenge-name {
+  max-width: 100%;
+  overflow: hidden;
+  text-overflow: ellipsis;   /* very long names end with "..." */
+  white-space: nowrap;
+  font-size: 18px;
+  font-weight: bold;
+}
+.challenge-won {
+  display: inline-flex;
+  align-items: center;
+  gap: 3px;
+  padding: 1px 8px 1px 2px;
+  background: #3f9a2a;
+  color: var(--cream);
+  border: 2px solid #2f6a1d;
+  border-radius: 10px;
+  font-size: 12px;
+  font-weight: bold;
+  white-space: nowrap;
+}
+.challenge-won .icon { width: 18px; height: 18px; }
+
+/* "Harc!": a smaller orange .action-btn */
+.challenge-fight {
+  flex: none;
+  padding: 6px 14px;
+  font-size: 17px;
+  box-shadow: 0 3px 0 var(--wood-dark);
+}
+.challenge-fight .icon { width: 20px; height: 20px; }
+.challenge-fight:active { transform: translateY(3px); box-shadow: 0 0 0 var(--wood-dark); }
+
+/* Modifier: colored badge + one-line description */
+.challenge-modifier { display: flex; align-items: center; gap: 8px; margin: 8px 0; }
+.challenge-badge {
+  flex: none;
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 2px 10px 2px 4px;
+  color: var(--cream);
+  border: 2px solid var(--wood-dark);
+  border-radius: 12px;
+  font-size: 13px;
+  font-weight: bold;
+  text-shadow: 1px 1px 0 rgba(0, 0, 0, 0.35);
+  white-space: nowrap;
+}
+.challenge-badge .icon { width: 20px; height: 20px; }
+.challenge-badge.none {
+  padding: 2px 10px;
+  background: #e6d3a6;
+  color: var(--wood-dark);
+  border-style: dashed;
+  text-shadow: none;
+}
+.challenge-modifier-desc { font-size: 12px; line-height: 1.25; }
+
+/* The two decks on a small wooden board */
+.challenge-decks {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  padding: 8px;
+  background: #b98a52;
+  border: 3px solid var(--wood-dark);
+  border-radius: 12px;
+  box-shadow: inset 0 3px 0 rgba(0, 0, 0, 0.2);
+}
+.challenge-deck-row { display: flex; align-items: center; gap: 8px; }
+.challenge-deck-label {
+  flex: 0 0 62px;
+  font-size: 13px;
+  font-weight: bold;
+  color: var(--cream);
+  text-shadow: 1px 1px 0 var(--wood-dark);
+}
+.challenge-deck-row.enemy .challenge-deck-label { color: #ffd2c8; }   /* enemy = reddish */
+
+/* 8 small cards in a row. Each is at most 38px wide (32px picture + border),
+   and they shrink together on narrow screens. */
+.challenge-deck-cards {
+  flex: 1;
+  min-width: 0;
+  display: grid;
+  grid-template-columns: repeat(8, minmax(0, 38px));
+  gap: 4px;
+}
+.challenge-slot {
+  display: flex;
+  padding: 1px;
+  background: var(--cream);
+  border: 2px solid;       /* the color is the card rarity, set in challenges.js */
+  border-radius: 7px;
+}
+.challenge-deck-row.enemy .challenge-slot { background: #f6ddd4; }
+.challenge-slot canvas {
+  display: block;
+  width: 100%;
+  max-width: 32px;
+  height: auto;
+  aspect-ratio: 1 / 1;
+  margin: auto;
+}
+
+/* "+N további...", "Nincs ilyen nevű tag." */
+.challenge-note { padding: 10px 0; text-align: center; font-weight: bold; opacity: 0.75; }
+.challenge-more { font-size: 15px; }
+
+/* Phones: the "Te" / "Ellenfél" label goes above its row, so the cards get the full width */
+@media (max-width: 420px) {
+  .challenge-deck-row { flex-direction: column; align-items: stretch; gap: 2px; }
+  .challenge-deck-label { flex: none; font-size: 12px; }
+  .challenge-modifier { align-items: flex-start; flex-direction: column; gap: 4px; }
+}

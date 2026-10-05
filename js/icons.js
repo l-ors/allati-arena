@@ -52,6 +52,23 @@ const ICONS = {
     <circle cx="32" cy="32" r="15" fill="none" stroke="#e0a020" stroke-width="3"/>
     <path d="M22 22 Q28 16 34 18" fill="none" stroke="#fff3c0" stroke-width="4" stroke-linecap="round"/></svg>`,
 
+  gem: `<svg viewBox="0 0 64 64">
+    <polygon points="32,4 56,22 46,58 18,58 8,22" fill="#2ed573" stroke="#0e8a4a" stroke-width="3"/>
+    <polygon points="32,4 42,22 32,58 22,22" fill="#7bed9f"/>
+    <polygon points="32,4 56,22 42,22" fill="#55efc4"/>
+    <polygon points="32,4 8,22 22,22" fill="#1dd1a1"/>
+    <polygon points="42,22 46,58 32,58" fill="#0e8a4a"/>
+    <polygon points="22,22 18,58 32,58" fill="#0e8a4a"/>
+    <path d="M22 10 L30 6" stroke="#ffffff" stroke-width="2.5" stroke-linecap="round"/>
+  </svg>`,
+
+  users: `<svg viewBox="0 0 64 64">
+    <circle cx="24" cy="22" r="10" fill="#ffc93c" stroke="#5a3515" stroke-width="3"/>
+    <path d="M8 52 C8 38 40 38 40 52 Z" fill="#e05a47" stroke="#5a3515" stroke-width="3"/>
+    <circle cx="44" cy="20" r="8" fill="#ffc93c" stroke="#5a3515" stroke-width="3"/>
+    <path d="M34 52 C34 40 56 40 56 52 Z" fill="#3b82f6" stroke="#5a3515" stroke-width="3"/>
+  </svg>`,
+
   // Farm chests: plain wood, iron bands, golden bands
   chest_small: `<svg viewBox="0 0 64 64">
     <path d="M8 30 C8 12 56 12 56 30 Z" fill="#c68a4c" stroke="#4a2c12" stroke-width="3" stroke-linejoin="round"/>

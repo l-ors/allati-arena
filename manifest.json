@@ -1,0 +1,18 @@
+{
+  "name": "Állati Aréna - Animal Clash",
+  "short_name": "Állati Aréna",
+  "description": "Clash Royale stílusú kártyajáték állatokkal",
+  "start_url": "./index.html",
+  "display": "standalone",
+  "orientation": "portrait",
+  "background_color": "#5a3515",
+  "theme_color": "#8a5a2b",
+  "icons": [
+    {
+      "src": "icon.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    }
+  ]
+}

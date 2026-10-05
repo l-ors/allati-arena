@@ -82,7 +82,18 @@ function createUnit(cardId, team, x, y, level = 1) {
     leap: s.leap, leapDamage: s.leap ? s.leap.damage * mult : 0, leapState: null, leapCooldown: 0, lift: 0,
     jumpAttack: !!s.jumpAttack, hopAttack: null,
     produce: s.produce, produceEvery: s.produce ? s.produce.every : 0, produceTimer: s.produce ? s.produce.every : 0,
-    deathFeed: s.deathFeed || 0, slowTimer: 0,
+    deathFeed: s.deathFeed || 0, slowTimer: 0, stunTimer: 0,
+    ignoresCollision: !!s.ignoresCollision,
+    sprintBurst: !!s.sprintBurst,
+    sprinting: !!s.sprintBurst,
+    tonguePull: !!s.tonguePull,
+    shockWave: s.shockWave || null,
+    shellDefense: s.shellDefense || 0,
+    diveBomb: !!s.diveBomb,
+    diving: false,
+    rageMode: !!s.rageMode,
+    raging: false,
+    groundPound: s.groundPound || null,
     poisons: [],
     cooldown: 0, peck: 0, jump: 0, moving: false,
     facing: 1,
@@ -103,13 +114,21 @@ function shuffle(list) {
 function startBattle(options = {}) {
   fitCanvas();
   const challenge = options.challenge || null;
+  const isMP = !!options.multiplayer;
   const queue = shuffle([...(challenge ? challenge.playerDeck : save.deck)]);
   // The enemy rolls a random 8-card deck from the cards of this arena
   const arenaCards = Object.keys(CARDS).filter(id => CARDS[id].arena <= save.arena);
-  const enemyDeck = challenge ? [...challenge.enemyDeck] : shuffle(arenaCards).slice(0, DECK_SIZE);
+  const enemyDeck = challenge
+    ? [...challenge.enemyDeck]
+    : options.enemyDeck
+    ? [...options.enemyDeck]
+    : shuffle(arenaCards).slice(0, DECK_SIZE);
   // The enemy's cards are as strong as the player's deck on average
   const avgLevel = save.deck.reduce((sum, id) => sum + save.cards[id].level, 0) / save.deck.length;
   battle = {
+    multiplayer: isMP,
+    role: options.role || null,
+    opponentName: options.opponentName || 'Enemy',
     time: BATTLE_TIME,
     feed: 5,
     enemyFeed: 5,
@@ -251,7 +270,7 @@ function canDeploy(team, card, x, y) {
   if (ownHalf) return true;
   const laneX = x < ARENA.centerX ? ARENA.lanes[0] : ARENA.lanes[1];
   const silo = battle.towers.find(t => t.team !== team && t.kind === 'princess' && t.x === laneX);
-  if (!silo.dead) return false;
+  if (!silo || !silo.dead) return false;
   return team === PLAYER ? y >= ARENA.siloY - 10 : y <= ARENA.H - ARENA.siloY + 10;
 }
 
@@ -339,9 +358,24 @@ function updateBuilding(u, dt) {
 function updateUnit(u, dt) {
   if (u.building) { updateBuilding(u, dt); return; }
   if (u.leapState) { updateLeap(u, dt); return; }
-  // Mud: slowed animals move and attack at half speed
+
+  // Stunned: electric shock stops movement and attacks
+  if (u.stunTimer > 0) {
+    u.stunTimer = Math.max(0, u.stunTimer - dt);
+    u.moving = false;
+    return;
+  }
+
+  // Honey Badger Rage Mode: below 50% HP, immune to slows and stuns
+  if (u.rageMode && u.hp <= u.maxHp * 0.5) {
+    u.raging = true;
+    u.slowTimer = 0;
+    u.stunTimer = 0;
+  }
+
+  // Mud / Slow: slowed animals move and attack at half speed
   u.slowTimer = Math.max(0, u.slowTimer - dt);
-  const slow = u.slowTimer > 0 ? 0.5 : 1;
+  const slow = (u.slowTimer > 0 && !u.raging) ? 0.5 : 1;
   u.cooldown -= dt * slow;
   u.leapCooldown -= dt;
   u.peck = Math.max(0, u.peck - dt);
@@ -354,11 +388,11 @@ function updateUnit(u, dt) {
     if (u.lifeLeft <= 0) { dealDamage(u, u.hp); return; }
   }
 
-  // The horse leaps in an arc while crossing the river
+  // Amphibian / River Leaping (Frog & Horse)
   if (u.jumpsRiver) {
     const top = ARENA.riverTop - 15;
     const bottom = ARENA.riverBottom + 15;
-    u.lift = u.y > top && u.y < bottom ? Math.sin(((u.y - top) / (bottom - top)) * Math.PI) * 18 : 0;
+    u.lift = u.y > top && u.y < bottom ? Math.sin(((u.y - top) / (bottom - top)) * Math.PI) * 20 : 0;
   }
 
   const target = u.guard ? findGuardTarget(u) : findTarget(u);
@@ -368,8 +402,22 @@ function updateUnit(u, dt) {
     return;
   }
 
-  // In reach: attack
   const dist = distance(u, target);
+
+  // Falcon Dive-Bombing
+  if (u.diveBomb) {
+    if (dist <= 130 && dist > u.range + u.radius + target.radius) {
+      u.diving = true;
+      u.lift = Math.max(0, (dist / 130) * 22);
+    } else if (dist <= u.range + u.radius + target.radius) {
+      u.lift = 0;
+    } else {
+      u.diving = false;
+      u.lift = 22;
+    }
+  }
+
+  // In reach: attack
   if (dist <= u.range + u.radius + target.radius) {
     u.moving = false;
     u.facing = target.x >= u.x ? 1 : -1;
@@ -391,8 +439,13 @@ function updateUnit(u, dt) {
     if (u.charging && Math.random() < dt * 20) spawnParticles(u.x - u.facing * 14, u.y - 2, '#d9bf8c', 1);
   }
 
-  // Walk
-  const speed = (u.charging ? u.speed * 2 : u.speed) * slow;
+  // Walk speed calculation
+  let baseSpeed = u.speed;
+  if (u.sprinting) baseSpeed *= 2;
+  else if (u.charging) baseSpeed *= 2;
+  else if (u.raging) baseSpeed *= 1.4;
+  else if (u.diving) baseSpeed *= 2.2;
+  const speed = baseSpeed * slow;
   moveToward(u, nextWaypoint(u, target), speed, dt);
 }
 
@@ -499,7 +552,59 @@ function attack(u, target) {
   if (u.charging) damage *= 2;               // charge hit = double damage
   if (target.bird) damage *= u.bonusVsBirds; // fox bites birds harder
 
-  u.cooldown = u.attackRate;
+  // Cheetah Sprint Burst: 2.5x damage on first strike
+  if (u.sprinting) {
+    damage *= 2.5;
+    u.sprinting = false;
+    spawnParticles(u.x, u.y, '#e67e22', 12);
+  }
+
+  // Falcon Dive-Bomb: 2.2x damage on aerial dive strike
+  if (u.diving) {
+    damage *= 2.2;
+    u.diving = false;
+    spawnParticles(target.x, target.y, '#4b382a', 10);
+  }
+
+  // Frog Tongue Pull: snatches light enemy units
+  if (u.tonguePull && !target.isTower && !target.building && (target.radius <= 12 || target.hp <= 650)) {
+    const pullDist = distance(u, target);
+    if (pullDist > u.radius + target.radius + 15) {
+      const k = 0.65;
+      target.x += (u.x - target.x) * k;
+      target.y += (u.y - target.y) * k;
+      spawnParticles(target.x, target.y, '#2ecc71', 6);
+    }
+  }
+
+  // Gorilla Ground Pound: creates circular earthquake shockwave
+  if (u.groundPound) {
+    const gp = u.groundPound;
+    for (const e of [...battle.units, ...battle.towers]) {
+      if (e.team === u.team || e.dead || e.flying) continue;
+      const d = distance(u, e);
+      if (d <= gp.radius + e.radius) {
+        if (e !== target) dealDamage(e, damage * 0.7);
+        if (!e.isTower && !e.building) {
+          const nx = d > 0 ? (e.x - u.x) / d : 0;
+          const ny = d > 0 ? (e.y - u.y) / d : 1;
+          e.x += nx * gp.pushback;
+          e.y += ny * gp.pushback;
+          e.slowTimer = gp.slowDuration;
+        }
+      }
+    }
+    spawnParticles(u.x, u.y, '#7f8c8d', 16);
+  }
+
+  // Honey Badger Rage Mode: 2x attack rate (+100% attack speed)
+  if (u.raging) {
+    u.cooldown = u.attackRate * 0.5;
+    spawnParticles(u.x, u.y, '#e74c3c', 5);
+  } else {
+    u.cooldown = u.attackRate;
+  }
+
   u.peck = 0.2;
   u.walkTime = 0;
   u.charging = false;
@@ -511,7 +616,7 @@ function attack(u, target) {
   hit(u, target, damage);
 }
 
-// Deals one attack's damage (plus splash, poison, etc.)
+// Deals one attack's damage (plus splash, poison, shockwave, etc.)
 function hit(u, target, damage) {
   // Rabbit: area damage on the ground around the target
   if (u.splashRadius) {
@@ -520,6 +625,24 @@ function hit(u, target, damage) {
       if (distance(e, target) <= u.splashRadius) dealDamage(e, damage);
     }
     spawnParticles(target.x, target.y, '#d9bf8c', 6);
+  }
+
+  // Electric Eel: Shock Wave chain lightning with stun
+  if (u.shockWave) {
+    const sw = u.shockWave;
+    target.stunTimer = sw.stunDuration;
+    let chained = 0;
+    for (const e of battle.units) {
+      if (chained >= sw.chainCount - 1) break;
+      if (e === target || e.team === u.team || e.dead) continue;
+      if (distance(target, e) <= sw.chainRange) {
+        dealDamage(e, damage * 0.75);
+        e.stunTimer = sw.stunDuration;
+        spawnParticles(e.x, e.y, '#00d2d3', 6);
+        chained++;
+      }
+    }
+    spawnParticles(target.x, target.y, '#00d2d3', 10);
   }
 
   if (u.projectile) {
@@ -587,6 +710,11 @@ function updatePoison(target, dt) {
 
 function dealDamage(target, amount) {
   if (target.dead) return;
+  // Armadillo Shell Defense: 50% damage reduction shield when drops below 50% HP
+  if (target.shellDefense && target.hp <= target.maxHp * 0.5) {
+    amount *= (1 - target.shellDefense);
+    spawnParticles(target.x, target.y, '#f39c12', 3);
+  }
   if (target.isTower) target.active = true;   // a hit barn wakes up
   target.hp -= amount;
   if (target.hp > 0) return;
@@ -627,6 +755,7 @@ function separateUnits() {
     for (let j = i + 1; j < units.length; j++) {
       const b = units[j];
       if (a.flying !== b.flying || b.leapState) continue;   // air and ground don't bump
+      if (a.ignoresCollision || b.ignoresCollision) continue; // Snake slithers past frontline tanks!
       const d = distance(a, b);
       const min = a.radius + b.radius;
       if (d > 0 && d < min) {
@@ -706,6 +835,7 @@ function updateParticles(dt) {
 // Very simple enemy with its own random 8-card deck:
 // throws spells at groups, defends against intruders, otherwise saves up and attacks
 function updateAI(dt) {
+  if (battle.multiplayer) return; // In multiplayer, opponent is a real human player!
   battle.aiTimer -= dt;
   if (battle.aiTimer > 0) return;
   battle.aiTimer = 0.5;
@@ -839,6 +969,14 @@ function endBattle() {
   }
   if (highestArena() > arenaBefore) chestInfo.innerHTML += `<span class="new-arena">Új aréna: ${ARENAS[highestArena() - 1].name}!</span>`;
   applyIcons(chestInfo);
+
+  if (typeof isMultiplayerMatch !== 'undefined' && isMultiplayerMatch && typeof notifyMultiplayerBattleEnd === 'function') {
+    notifyMultiplayerBattleEnd(p, e);
+  }
+  if (typeof updatePlayerCupsUI === 'function') {
+    updatePlayerCupsUI();
+  }
+
   document.getElementById('result').classList.remove('hidden');
 }
 
@@ -1078,17 +1216,19 @@ function canvasPos(e) {
   };
 }
 
-canvas.addEventListener('mousemove', e => { mouse = canvasPos(e); });
-canvas.addEventListener('mouseleave', () => { mouse = null; });
-
-canvas.addEventListener('click', e => {
+function deployAtPos(pos) {
   if (!battle || battle.over || selectedSlot === null) return;
-  const pos = canvasPos(e);
   const cardId = battle.hand[selectedSlot];
   const card = CARDS[cardId];
   if (!canDeploy(PLAYER, card, pos.x, pos.y) || battle.feed < card.cost) return;
 
-  playCard(cardId, PLAYER, pos.x, Math.min(pos.y, ARENA.H - 20));
+  const targetY = Math.min(pos.y, ARENA.H - 20);
+  playCard(cardId, PLAYER, pos.x, targetY);
+
+  if (battle.multiplayer && typeof broadcastDeployCard === 'function') {
+    broadcastDeployCard(cardId, pos.x, targetY);
+  }
+
   battle.feed -= card.cost;
 
   // Card rotation: the next card takes the empty slot, the played one goes to the back
@@ -1097,6 +1237,26 @@ canvas.addEventListener('click', e => {
   battle.queue.push(cardId);
   selectedSlot = null;
   renderHand(usedSlot);
+}
+
+canvas.addEventListener('mousemove', e => { mouse = canvasPos(e); });
+canvas.addEventListener('mouseleave', () => { mouse = null; });
+canvas.addEventListener('click', e => {
+  deployAtPos(canvasPos(e));
+});
+
+// Mobile Touch Controls
+canvas.addEventListener('touchstart', e => {
+  if (e.touches && e.touches.length > 0) mouse = canvasPos(e.touches[0]);
+}, { passive: true });
+canvas.addEventListener('touchmove', e => {
+  if (e.touches && e.touches.length > 0) mouse = canvasPos(e.touches[0]);
+}, { passive: true });
+canvas.addEventListener('touchend', e => {
+  if (e.changedTouches && e.changedTouches.length > 0) {
+    deployAtPos(canvasPos(e.changedTouches[0]));
+  }
+  mouse = null;
 });
 
 // Makes the canvas fill its box at full screen resolution (no gaps, no blur).
@@ -1113,7 +1273,9 @@ function fitCanvas() {
   view.scale = Math.min(w / ARENA.W, h / ARENA.H);
   view.offsetX = (w - ARENA.W * view.scale) / 2;
   view.offsetY = (h - ARENA.H * view.scale) / 2;
-  arenaImage = ARENAS[save.arena - 1].build(view.scale * view.dpr);
+  const arenaId = (battle && battle.arena) ? battle.arena : save.arena;
+  const arenaDef = ARENAS[Math.min(ARENAS.length, Math.max(1, arenaId)) - 1] || ARENAS[0];
+  arenaImage = arenaDef.build(view.scale * view.dpr);
 }
 window.addEventListener('resize', () => { if (battle) fitCanvas(); });
 

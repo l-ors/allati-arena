@@ -1,0 +1,263 @@
+<!DOCTYPE html>
+<html lang="hu">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+  <title>Állati Aréna</title>
+  <link rel="icon" type="image/png" href="icon.png">
+  <link rel="apple-touch-icon" href="icon.png">
+  <link rel="manifest" href="manifest.json">
+  <meta name="theme-color" content="#8a5a2b">
+  <link rel="stylesheet" href="css/style.css">
+  <link rel="stylesheet" href="css/shop.css">
+  <link rel="stylesheet" href="css/challenges.css">
+</head>
+<body>
+  <div id="app">
+    <header class="top-bar">
+      <div class="logo">
+        <span class="icon logo-icon" data-icon="paw"></span>
+        <h1>Állati Aréna</h1>
+      </div>
+      <div class="pills">
+        <div class="gold-pill trophy-pill"><span class="icon" data-icon="trophy"></span><span id="trophy-amount">0</span></div>
+        <div class="gold-pill gem-pill"><span class="icon" data-icon="gem"></span><span id="gem-amount">120</span></div>
+        <div class="gold-pill"><span class="icon" data-icon="gold"></span><span id="gold-amount">0</span></div>
+      </div>
+    </header>
+
+    <main id="content">
+      <!-- SHOP -->
+      <section class="tab-page" id="page-shop">
+        <div id="shop-page"></div>
+      </section>
+
+      <!-- DECK BUILDER -->
+      <section class="tab-page" id="page-deck">
+        <h2 class="page-title">Paklim (8 kártya)</h2>
+        <div id="swap-banner" class="swap-banner hidden">
+          <span>Válaszd ki, melyik kártya helyére kerüljön!</span>
+          <button id="btn-swap-cancel">Mégse</button>
+        </div>
+        <div id="deck-grid" class="card-grid"></div>
+        <h2 class="page-title">Gyűjtemény</h2>
+        <div id="collection-grid" class="card-grid"></div>
+      </section>
+
+      <!-- BATTLE LOBBY -->
+      <section class="tab-page active" id="page-battle">
+        <div class="arena-card">
+          <div class="arena-nav">
+            <button id="btn-arena-prev" class="arena-arrow">&lsaquo;</button>
+            <div class="arena-label" id="arena-label">1. Aréna</div>
+            <button id="btn-arena-next" class="arena-arrow">&rsaquo;</button>
+          </div>
+          <div class="arena-preview-wrap">
+            <canvas id="arena-preview"></canvas>
+            <div id="arena-lock" class="arena-lock hidden">
+              <span class="icon" data-icon="lock"></span>
+              <span id="arena-lock-text"></span>
+            </div>
+          </div>
+          <h2 id="arena-name">Farm</h2>
+          <div class="arena-hint">Kattints az arénára: mit találsz benne?</div>
+          <div id="arena-progress" class="arena-progress"></div>
+        </div>
+        <button id="btn-fight" class="big-btn">Gyakorló Csata (Bot ellen)</button>
+        <!-- MULTIPLAYER SECTION WITH MODE SWITCH -->
+        <div class="mp-mode-section">
+          <!-- Mode Switch Toggle -->
+          <div class="mp-mode-toggle" id="mp-mode-toggle">
+            <button type="button" class="mp-toggle-btn active" id="btn-toggle-quick" data-mode="quick">
+              <span class="icon" data-icon="search"></span> 🔍 Gyors Meccs
+            </button>
+            <button type="button" class="mp-toggle-btn" id="btn-toggle-code" data-mode="code">
+              <span class="icon" data-icon="lock"></span> 🔑 Kódos Szoba
+            </button>
+          </div>
+
+          <!-- PANEL 1: Quick Match (Search Mode) -->
+          <div class="mp-panel" id="mp-panel-quick">
+            <div class="mp-profile-summary">
+              <div class="mp-cups-badge">
+                <span class="icon" data-icon="trophy"></span>
+                <span class="mp-cups-val" id="mp-player-cups">0</span>
+                <span class="mp-cups-lbl">Kupa</span>
+              </div>
+              <div class="mp-status-pill" id="mp-quick-status-pill">
+                <span class="status-dot connecting" id="mp-quick-dot"></span>
+                <span id="mp-quick-status-txt">Szerver kapcsolat...</span>
+              </div>
+            </div>
+
+            <!-- Idle state: Find Match button -->
+            <div id="mp-search-idle" class="mp-search-view">
+              <button id="btn-find-match" class="big-btn mp-search-btn">
+                <span class="icon" data-icon="battle"></span>
+                <span>🎮 Meccs Keresése</span>
+              </button>
+              <div class="mp-search-hint">Párosítás hasonló kupa szerint (vagy azonnali meccs 2 játékos esetén)</div>
+            </div>
+
+            <!-- Searching state: Radar pulse & Timer -->
+            <div id="mp-search-active" class="mp-search-view hidden">
+              <div class="mp-radar-wrap">
+                <div class="mp-radar-ring ring-1"></div>
+                <div class="mp-radar-ring ring-2"></div>
+                <div class="mp-radar-icon">🐾</div>
+              </div>
+              <div class="mp-search-title">🔍 Ellenfél keresése...</div>
+              <div class="mp-search-timer" id="mp-search-timer">00:00</div>
+              <div class="mp-search-sub" id="mp-search-queue-info">Várakozás a szerveren...</div>
+              <button id="btn-cancel-search" class="action-btn cancel mp-cancel-btn">❌ Mégse</button>
+            </div>
+
+            <!-- Found Opponent Overlay / Banner -->
+            <div id="mp-match-found-banner" class="mp-match-found-banner hidden">
+              <div class="mp-found-badge">⚔️ ELLENFÉL MEGTALÁLVA!</div>
+              <div class="mp-found-players">
+                <div class="mp-player-card my-card">
+                  <span class="name" id="mp-found-my-name">Te</span>
+                  <span class="cups" id="mp-found-my-cups">🏆 0</span>
+                </div>
+                <div class="mp-vs-badge">VS</div>
+                <div class="mp-player-card opp-card">
+                  <span class="name" id="mp-found-opp-name">Ellenfél</span>
+                  <span class="cups" id="mp-found-opp-cups">🏆 0</span>
+                </div>
+              </div>
+              <div class="mp-countdown" id="mp-found-countdown">Indulás 3 másodperc...</div>
+            </div>
+          </div>
+
+          <!-- PANEL 2: Private Room with Code -->
+          <div class="mp-panel hidden" id="mp-panel-code">
+            <div class="mp-lobby-row">
+              <button id="btn-mp-host" class="big-btn mp-lobby-btn"><span class="icon" data-icon="battle"></span> Szoba Nyitás</button>
+              <button id="btn-mp-join" class="big-btn mp-lobby-btn join"><span class="icon" data-icon="users"></span> Csatlakozás</button>
+            </div>
+            <div class="mp-code-hint">Játssz közvetlenül barátoddal egy 4 jegyű szobakóddal!</div>
+          </div>
+
+          <!-- Server connection bar -->
+          <div class="mp-server-bar">
+            <div class="mp-server-status-wrap">
+              <span id="mp-status-indicator" class="status-dot connecting"></span>
+              <span id="mp-status-text">Csatlakozás szerverhez...</span>
+            </div>
+            <button id="btn-mp-server-cfg" class="mp-cfg-btn" title="Szerver cím beállítása">⚙️ Szerver</button>
+          </div>
+        </div>
+        <h3 class="chest-title">Ládák</h3>
+        <div id="chest-slots" class="chest-slots"></div>
+      </section>
+
+      <!-- CHALLENGE -->
+      <section class="tab-page" id="page-challenge">
+        <div id="challenge-page"></div>
+      </section>
+    </main>
+
+    <nav class="tab-bar">
+      <button class="tab" data-tab="shop"><span class="icon" data-icon="shop"></span><span>Bolt</span></button>
+      <button class="tab" data-tab="deck"><span class="icon" data-icon="deck"></span><span>Pakli</span></button>
+      <button class="tab active" data-tab="battle"><span class="icon" data-icon="battle"></span><span>Csata</span></button>
+      <button class="tab" data-tab="challenge"><span class="icon" data-icon="trophy"></span><span>Kihívás</span></button>
+    </nav>
+
+    <!-- CARD DETAILS (opens when you tap a card) -->
+    <div id="card-modal" class="modal hidden">
+      <div class="modal-box">
+        <button class="modal-close" id="btn-card-close">&times;</button>
+        <div id="card-modal-body"></div>
+      </div>
+    </div>
+
+    <!-- ALL ARENAS (opens when you click the arena picture) -->
+    <div id="arena-modal" class="modal hidden">
+      <div class="modal-box">
+        <button class="modal-close" id="btn-arena-close">&times;</button>
+        <h3 class="chest-modal-title">Arénák</h3>
+        <div id="arena-list" class="arena-list"></div>
+      </div>
+    </div>
+
+    <!-- CHEST REWARDS -->
+    <div id="chest-modal" class="modal hidden">
+      <div class="modal-box" id="chest-modal-body"></div>
+    </div>
+
+    <!-- SERVER CONFIG MODAL -->
+    <div id="server-config-modal" class="modal hidden">
+      <div class="modal-box mp-box">
+        <button class="modal-close" id="btn-server-close">&times;</button>
+        <div class="mp-head">
+          <span class="icon" data-icon="users"></span>
+          <h3>Multiplayer Szerver</h3>
+        </div>
+        <p class="mp-sub">Add meg a szerver WebSocket (WSS/WS) címét. Az APK automatikusan ide kapcsolódik!</p>
+        <div class="mp-input-wrap">
+          <input type="text" id="mp-server-url-input" placeholder="wss://allati-arena.onrender.com" />
+        </div>
+        <div class="mp-presets">
+          <button class="preset-btn" data-url="wss://allati-arena.onrender.com">Render (Alapértelmezett)</button>
+          <button class="preset-btn" data-url="wss://allati-arena.netlify.app/ws">Netlify Proxy</button>
+          <button class="preset-btn" data-url="ws://localhost:3000">Localhost:3000</button>
+        </div>
+        <div id="mp-test-result" class="mp-test-msg"></div>
+        <div class="mp-modal-actions">
+          <button class="big-btn mp-connect-btn" id="btn-server-save">Mentés & Csatlakozás</button>
+          <button class="action-btn cancel" id="btn-server-cancel">Mégse</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- BATTLE SCREEN (covers the whole app while fighting) -->
+    <div id="battle-screen" class="hidden">
+      <div class="canvas-wrap">
+        <canvas id="battle-canvas" width="360" height="640"></canvas>
+      </div>
+      <div class="hand">
+        <div class="feed-bar">
+          <span class="icon feed-icon" data-icon="feed"></span>
+          <div class="feed-track"><div id="feed-fill"></div></div>
+          <span id="feed-count">5</span>
+        </div>
+        <div id="hand-cards"></div>
+      </div>
+
+      <div id="result" class="hidden">
+        <div class="result-box">
+          <h2 id="result-title"></h2>
+          <p id="result-crowns"></p>
+          <div id="result-chest"></div>
+          <button id="btn-result-ok" class="big-btn">Tovább</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script src="js/icons.js"></script>
+  <script src="js/cards.js"></script>
+  <script src="js/save.js"></script>
+  <script src="js/arena.js"></script>
+  <script src="js/arenas.js"></script>
+  <script src="js/draw.js"></script>
+  <script src="js/preview.js"></script>
+  <script src="js/battle.js"></script>
+  <script src="js/deck.js"></script>
+  <script src="js/shop.js"></script>
+  <script src="js/members.js"></script>
+  <script src="js/challenges.js"></script>
+  <script src="js/chest-animation.js"></script>
+  <script src="js/multiplayer.js"></script>
+  <script src="js/ui.js"></script>
+  <script>
+    if ('serviceWorker' in navigator) {
+      window.addEventListener('load', () => {
+        navigator.serviceWorker.register('./sw.js').catch(err => console.log('SW register error:', err));
+      });
+    }
+  </script>
+</body>
+</html>

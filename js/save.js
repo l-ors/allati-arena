@@ -29,13 +29,21 @@ const CHESTS = {
 
 function defaultSave() {
   return {
-    gold: 0,
+    gold: 500,
+    gems: 120,
     wins: 0,
     trophies: 0,
     arena: 1,      // the arena picked in the lobby
     cards: {},     // id -> { level, count, unlocked }
     deck: [...STARTER_DECK],
+    savedDecks: [
+      [...STARTER_DECK],
+      ['snake', 'frog', 'cheetah', 'eel', 'armadillo', 'falcon', 'badger', 'gorilla'],
+      ['chickens', 'rooster', 'bull', 'horse', 'snake', 'frog', 'cheetah', 'cornRain']
+    ],
+    activeDeckIndex: 0,
     chests: [],    // { type, arena, readyAt } (readyAt = time in ms when it can be opened)
+    bundlesBought: {},
   };
 }
 
@@ -47,6 +55,24 @@ function loadSave() {
     data = null;
   }
   const s = Object.assign(defaultSave(), data || {});
+  if (s.gems === undefined) s.gems = 120;
+  if (!s.savedDecks || s.savedDecks.length < 3) {
+    s.savedDecks = [
+      [...s.deck],
+      ['snake', 'frog', 'cheetah', 'eel', 'armadillo', 'falcon', 'badger', 'gorilla'],
+      ['chickens', 'rooster', 'bull', 'horse', 'snake', 'frog', 'cheetah', 'cornRain']
+    ];
+    s.activeDeckIndex = 0;
+  if (!s.playerId) {
+    s.playerId = 'player_' + Date.now().toString(36) + Math.random().toString(36).substr(2, 6);
+  }
+  if (!s.playerName) {
+    s.playerName = 'Harcos';
+  }
+  if (s.trophies === undefined || s.trophies === null || isNaN(s.trophies)) {
+    s.trophies = 0;
+  }
+  if (!s.bundlesBought) s.bundlesBought = {};
   // Every card gets an entry, also cards added in a later version of the game
   for (const id of Object.keys(CARDS)) {
     if (!s.cards[id]) s.cards[id] = { level: 1, count: 0 };

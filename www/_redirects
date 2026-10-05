@@ -1,0 +1,3 @@
+/ws/*  wss://allati-arena.onrender.com/:splat  200!
+/api/* https://allati-arena.onrender.com/api/:splat 200!
+/*     /index.html                             200

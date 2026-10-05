@@ -10,8 +10,12 @@ function showTab(name) {
 }
 
 function updateGold() {
-  document.getElementById('gold-amount').textContent = save.gold;
-  document.getElementById('trophy-amount').textContent = save.trophies;
+  const g = document.getElementById('gold-amount');
+  if (g) g.textContent = save.gold;
+  const gm = document.getElementById('gem-amount');
+  if (gm) gm.textContent = save.gems !== undefined ? save.gems : 120;
+  const tr = document.getElementById('trophy-amount');
+  if (tr) tr.textContent = save.trophies;
 }
 
 // ---------- Arenas (lobby) ----------
@@ -148,6 +152,13 @@ function tickChests() {
 
 function showChestRewards(rewards) {
   if (!rewards) return;   // not ready yet
+  if (typeof playChestOpeningAnimation === 'function') {
+    playChestOpeningAnimation(rewards, () => {
+      updateGold();
+      renderChests();
+    });
+    return;
+  }
   const dpr = window.devicePixelRatio || 1;
   const body = document.getElementById('chest-modal-body');
   body.innerHTML = `
@@ -192,6 +203,7 @@ function closeBattle() {
   stopBattle();
   document.getElementById('battle-screen').classList.add('hidden');
   updateGold();
+  if (typeof updatePlayerCupsUI === 'function') updatePlayerCupsUI();
   showTab(fromChallenge ? 'challenge' : 'battle');
 }
 
@@ -215,3 +227,12 @@ document.querySelectorAll('.tab').forEach(t => {
 });
 document.getElementById('btn-fight').addEventListener('click', () => openBattle());
 document.getElementById('btn-result-ok').addEventListener('click', closeBattle);
+
+const btnHost = document.getElementById('btn-mp-host');
+if (btnHost) btnHost.addEventListener('click', () => {
+  if (typeof createMultiplayerRoom === 'function') createMultiplayerRoom();
+});
+const btnJoin = document.getElementById('btn-mp-join');
+if (btnJoin) btnJoin.addEventListener('click', () => {
+  if (typeof showJoinInputModal === 'function') showJoinInputModal();
+});

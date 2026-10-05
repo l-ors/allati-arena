@@ -167,3 +167,15 @@ You should hash their yt name, and make it a unique challenge, your and the enem
 ---
 
 Also, erdő aréna should have no card yet, as per I laid it out, and only all the cards we have so far should be in farm. We'll do that next
+
+---
+
+Continue
+
+---
+
+Continue do not stop working until it is completely done then WRITE DONE and write down how can I test it
+
+---
+
+Ok make a .apk out of it and optimize the apk for phone and make a step by step guide how I can set up the server on a Netlify domain and in the apk it should connect to the Netlify automatically so the multiplayer works and build server version in a separate folder if necessary

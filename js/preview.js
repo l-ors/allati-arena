@@ -669,6 +669,213 @@ const PREVIEW_DRAW = {
     });
     fadeOut(ctx, w, h, cycle);
   },
+
+  snake(ctx, w, h, time) {
+    const cycle = time % 4;
+    const groundY = h - 22;
+    const targetX = w - 45;
+    const stopX = targetX - 25;
+    const runTime = 1.2;
+    const biting = cycle >= runTime && cycle < 3.6;
+    const x = -30 + Math.min(cycle / runTime, 1) * (stopX + 30);
+    const hitT = ((cycle - runTime) % 0.9) / 0.9;
+
+    drawPreviewGround(ctx, w, h, groundY);
+    const shaking = biting && hitT < 0.3;
+    drawScarecrow(ctx, targetX + (shaking ? Math.sin(time * 40) * 1.5 : 0), groundY);
+
+    const attack = biting && hitT < 0.3;
+    drawSnake(ctx, x, groundY + 4, { scale: 1.8, facing: 1, time, team: PLAYER, moving: cycle < runTime, attack });
+
+    if (biting) {
+      drawDamagePop(ctx, targetX + 12, groundY - 50, hitT, '-52');
+      ctx.fillStyle = '#2ecc71';
+      ctx.font = 'bold 11px Trebuchet MS, sans-serif';
+      ctx.fillText('Méreg (DoT)', targetX + 10, groundY - 65 - hitT * 8);
+    }
+    fadeOut(ctx, w, h, cycle);
+  },
+
+  frog(ctx, w, h, time) {
+    const cycle = time % 4;
+    const groundY = h - 22;
+    const riverX = 90;
+    const targetX = w - 45;
+    const jumping = cycle < 1.0;
+    const frogX = cycle < 1.0 ? 30 + cycle * 70 : 100;
+    const lift = jumping ? Math.sin(cycle * Math.PI) * 28 : 0;
+    const tongueOut = cycle >= 1.2 && cycle < 3.2;
+
+    drawPreviewGround(ctx, w, h, groundY);
+    ctx.fillStyle = '#3f97d4';
+    ctx.fillRect(riverX - 20, 0, 40, h);
+
+    const pulled = tongueOut ? Math.min(1, (cycle - 1.2) * 1.5) : 0;
+    const scareX = targetX - pulled * 50;
+    drawScarecrow(ctx, scareX, groundY);
+
+    drawFrog(ctx, frogX, groundY + 2, { scale: 1.8, facing: 1, time, team: PLAYER, moving: jumping, lift, attack: tongueOut });
+
+    if (tongueOut && ((cycle - 1.2) % 0.8) < 0.3) {
+      drawDamagePop(ctx, scareX + 10, groundY - 45, (cycle % 0.8) / 0.8, '-65 (Rántás!)');
+    }
+    fadeOut(ctx, w, h, cycle);
+  },
+
+  cheetah(ctx, w, h, time) {
+    const cycle = time % 4;
+    const groundY = h - 22;
+    const targetX = w - 45;
+    const stopX = targetX - 28;
+    const runTime = 0.7;
+    const hit = cycle >= runTime && cycle < 3.6;
+    const x = -30 + Math.min(cycle / runTime, 1) * (stopX + 30);
+    const hitT = ((cycle - runTime) % 1.0) / 1.0;
+
+    drawPreviewGround(ctx, w, h, groundY);
+    const shaking = hit && hitT < 0.3;
+    drawScarecrow(ctx, targetX + (shaking ? Math.sin(time * 50) * 2.5 : 0), groundY);
+
+    const sprinting = cycle < runTime;
+    const attack = hit && hitT < 0.35;
+    drawCheetah(ctx, x, groundY + 4, { scale: 1.8, facing: 1, time, team: PLAYER, moving: sprinting, sprinting, attack });
+
+    if (hit) {
+      const isFirst = cycle < runTime + 0.9;
+      drawDamagePop(ctx, targetX + 12, groundY - 50, hitT, isFirst ? '-275 (CRIT!)' : '-110');
+    }
+    fadeOut(ctx, w, h, cycle);
+  },
+
+  eel(ctx, w, h, time) {
+    const cycle = time % 4;
+    const groundY = h - 22;
+    const eelX = 55;
+    const scareX = w - 85;
+    const crow = { x: w - 40, y: 35 + Math.sin(time * 3) * 4 };
+
+    drawPreviewGround(ctx, w, h, groundY);
+    drawScarecrow(ctx, scareX, groundY);
+    drawCrow(ctx, crow.x, crow.y, time);
+
+    const shock = (cycle % 1.5) < 0.4;
+    drawEel(ctx, eelX, groundY - 14, { scale: 1.8, facing: 1, time, team: PLAYER });
+
+    if (shock) {
+      ctx.strokeStyle = '#00ffff';
+      ctx.lineWidth = 2.5;
+      ctx.beginPath();
+      ctx.moveTo(eelX + 20, groundY - 24);
+      ctx.lineTo(scareX - 10, groundY - 30);
+      ctx.lineTo(crow.x, crow.y);
+      ctx.stroke();
+
+      drawDamagePop(ctx, scareX + 10, groundY - 45, (cycle % 0.5) / 0.5, '-85');
+      drawDamagePop(ctx, crow.x + 8, crow.y - 15, (cycle % 0.5) / 0.5, 'BÉNÍTVA!');
+      drawStunnedEffect(ctx, scareX, groundY - 58, time);
+      drawStunnedEffect(ctx, crow.x, crow.y - 12, time);
+    }
+    fadeOut(ctx, w, h, cycle);
+  },
+
+  armadillo(ctx, w, h, time) {
+    const cycle = time % 4;
+    const groundY = h - 22;
+    const targetX = w - 45;
+    const stopX = targetX - 26;
+    const x = cycle < 1.2 ? -20 + (cycle / 1.2) * (stopX + 20) : stopX;
+    const shellActive = cycle >= 1.5 && cycle < 3.6;
+
+    drawPreviewGround(ctx, w, h, groundY);
+    drawScarecrow(ctx, targetX, groundY);
+
+    drawArmadillo(ctx, x, groundY + 4, { scale: 1.8, facing: 1, time, team: PLAYER, moving: cycle < 1.2, shellActive });
+
+    if (shellActive) {
+      ctx.fillStyle = '#f39c12';
+      ctx.font = 'bold 12px Trebuchet MS, sans-serif';
+      ctx.textAlign = 'center';
+      ctx.fillText('-50% Páncél Védelem', x, groundY - 30);
+    }
+    fadeOut(ctx, w, h, cycle);
+  },
+
+  falcon(ctx, w, h, time) {
+    const cycle = time % 4;
+    const groundY = h - 22;
+    const targetX = w - 50;
+    const diving = cycle >= 1.0 && cycle < 1.7;
+    const swoopingUp = cycle >= 1.7 && cycle < 2.5;
+    let x = 40;
+    let lift = 45;
+    if (diving) {
+      const t = (cycle - 1.0) / 0.7;
+      x = 40 + t * (targetX - 40);
+      lift = (1 - t) * 45;
+    } else if (swoopingUp) {
+      const t = (cycle - 1.7) / 0.8;
+      x = targetX + t * 40;
+      lift = t * 45;
+    }
+
+    drawPreviewGround(ctx, w, h, groundY);
+    const shaking = cycle >= 1.6 && cycle < 2.0;
+    drawScarecrow(ctx, targetX + (shaking ? Math.sin(time * 50) * 2 : 0), groundY);
+
+    drawFalcon(ctx, x, groundY, { scale: 1.8, facing: 1, time, team: PLAYER, lift, diving });
+
+    if (cycle >= 1.6 && cycle < 2.4) {
+      drawDamagePop(ctx, targetX + 12, groundY - 50, (cycle - 1.6) / 0.8, '-209 (Zuhanás!)');
+    }
+    fadeOut(ctx, w, h, cycle);
+  },
+
+  badger(ctx, w, h, time) {
+    const cycle = time % 4;
+    const groundY = h - 22;
+    const targetX = w - 45;
+    const stopX = targetX - 24;
+    const raging = cycle >= 1.2;
+    const x = cycle < 0.8 ? -20 + (cycle / 0.8) * (stopX + 20) : stopX;
+    const hitEvery = raging ? 0.4 : 0.8;
+    const hitT = ((cycle - 0.8) % hitEvery) / hitEvery;
+
+    drawPreviewGround(ctx, w, h, groundY);
+    const shaking = cycle >= 0.8 && hitT < 0.3;
+    drawScarecrow(ctx, targetX + (shaking ? Math.sin(time * 40) * 1.5 : 0), groundY);
+
+    drawBadger(ctx, x, groundY + 4, { scale: 1.8, facing: 1, time, team: PLAYER, moving: cycle < 0.8, attack: hitT < 0.3, raging });
+
+    if (cycle >= 0.8) {
+      drawDamagePop(ctx, targetX + 12, groundY - 50, hitT, raging ? '-78 (DÜH!)' : '-78');
+    }
+    fadeOut(ctx, w, h, cycle);
+  },
+
+  gorilla(ctx, w, h, time) {
+    const cycle = time % 4;
+    const groundY = h - 22;
+    const targetX = w - 45;
+    const stopX = targetX - 35;
+    const walking = cycle < 1.0;
+    const slam = cycle >= 1.4 && cycle < 2.0;
+    const x = walking ? -20 + (cycle / 1.0) * (stopX + 20) : stopX;
+
+    drawPreviewGround(ctx, w, h, groundY);
+    const shaking = slam && ((cycle - 1.4) < 0.3);
+    drawScarecrow(ctx, targetX + (shaking ? Math.sin(time * 50) * 3 : 0), groundY);
+
+    drawGorilla(ctx, x, groundY + 4, { scale: 2.0, facing: 1, time, team: PLAYER, moving: walking, attack: slam });
+
+    if (slam) {
+      drawDamagePop(ctx, targetX + 12, groundY - 50, (cycle - 1.4) / 0.6, '-145 (FÖLDCSAPÁS!)');
+      ctx.strokeStyle = 'rgba(127, 140, 141, 0.7)';
+      ctx.lineWidth = 2;
+      ellipse(ctx, x + 15, groundY, 35 * ((cycle - 1.4) / 0.6), 12 * ((cycle - 1.4) / 0.6));
+      ctx.stroke();
+    }
+    fadeOut(ctx, w, h, cycle);
+  },
 };
 
 // Shared by the two pigs: run in fast, then bite the scarecrow again and again

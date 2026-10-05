@@ -124,3 +124,374 @@
   line-height: 1.15;
   text-align: center;
 }
+
+.shop-section-title {
+  margin: 18px 0 10px;
+  font-size: 18px;
+  font-weight: bold;
+  color: var(--wood-dark);
+  text-align: left;
+}
+
+/* Daily Gift Banner */
+.daily-gift-banner {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 16px;
+  padding: 12px 16px;
+  background: linear-gradient(135deg, #10ac84, #1dd1a1);
+  border: 3px solid #0e8a4a;
+  border-radius: 16px;
+  box-shadow: 0 4px 0 #0e8a4a;
+  color: #fff;
+}
+.daily-gift-info h4 { font-size: 16px; margin-bottom: 2px; text-shadow: 1px 1px 0 rgba(0,0,0,0.3); }
+.daily-gift-info p { font-size: 12px; opacity: 0.95; margin: 0; }
+.claim-daily-btn {
+  padding: 8px 16px;
+  font-weight: bold;
+  font-size: 14px;
+  background: #ffc93c;
+  color: #5a3515;
+  border: 2px solid #5a3515;
+  border-radius: 12px;
+  box-shadow: 0 3px 0 #5a3515;
+  white-space: nowrap;
+}
+
+/* Special Featured Bundles */
+.special-bundles-grid {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  margin-bottom: 20px;
+}
+.bundle-card {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  padding: 16px 14px 14px;
+  background: linear-gradient(135deg, #fff7e6, #ffeaa7);
+  border: 4px solid var(--wood-dark);
+  border-radius: 18px;
+  box-shadow: 0 6px 0 var(--wood-dark);
+  text-align: left;
+}
+.bundle-badge {
+  position: absolute;
+  top: -12px;
+  left: 16px;
+  padding: 3px 12px;
+  background: #eb4d4b;
+  color: #fff;
+  border: 2px solid #b33939;
+  border-radius: 12px;
+  font-size: 11px;
+  font-weight: bold;
+  letter-spacing: 0.5px;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.25);
+}
+.bundle-title {
+  font-size: 19px;
+  font-weight: bold;
+  color: var(--wood-dark);
+  margin-bottom: 4px;
+}
+.bundle-desc {
+  font-size: 13px;
+  color: #634524;
+  margin-bottom: 12px;
+  line-height: 1.3;
+}
+.bundle-contents {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px 10px;
+  margin-bottom: 12px;
+}
+.bundle-contents .pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 4px 10px;
+  border-radius: 12px;
+  font-size: 13px;
+  font-weight: bold;
+}
+.bundle-contents .pill.gold { background: #ffeaa7; color: #b7791f; border: 1.5px solid #d69e2e; }
+.bundle-contents .pill.gem { background: #dff9fb; color: #10ac84; border: 1.5px solid #1dd1a1; }
+.bundle-contents .pill.chest { background: #f8efba; color: #8a5a2b; border: 1.5px solid #8a5a2b; }
+.bundle-contents .icon { width: 18px; height: 18px; }
+
+.bundle-buy-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  width: 100%;
+  margin: 0;
+  padding: 10px 0;
+  font-size: 18px;
+  background: linear-gradient(#2ed573, #10ac84);
+  border: 3px solid #0e8a4a;
+  border-radius: 14px;
+  color: #fff;
+  box-shadow: 0 4px 0 #0e8a4a;
+}
+.bundle-buy-btn .icon { width: 24px; height: 24px; }
+
+/* ---------- Chest Opening Animation Overlay ---------- */
+.chest-anim-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 9999;
+  background: rgba(10, 15, 25, 0.92);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+  user-select: none;
+}
+#chest-rays-canvas {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  width: 100%;
+  height: 100%;
+}
+.chest-stage {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  z-index: 2;
+  width: 100%;
+  max-width: 480px;
+  padding: 20px;
+}
+
+/* 3D Animated Chest Element */
+.chest-box-wrap {
+  width: 140px;
+  height: 130px;
+  cursor: pointer;
+  perspective: 600px;
+  animation: chestRumble 1.8s infinite ease-in-out;
+  transition: transform 0.2s;
+}
+.chest-box-wrap:hover { transform: scale(1.05); }
+.chest-box-wrap.opened { animation: none; transform: scale(0.9) translateY(40px); opacity: 0.6; }
+
+@keyframes chestRumble {
+  0%, 100% { transform: translateY(0) rotate(0); }
+  25% { transform: translateY(-8px) rotate(-3deg); }
+  75% { transform: translateY(-8px) rotate(3deg); }
+}
+
+.chest-box {
+  position: relative;
+  width: 100%;
+  height: 100%;
+}
+.chest-lid {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 140px;
+  height: 60px;
+  background: linear-gradient(#b5703a, #7a4a22);
+  border: 4px solid #4a2c12;
+  border-radius: 24px 24px 8px 8px;
+  box-shadow: 0 4px 10px rgba(0,0,0,0.5);
+  transform-origin: top center;
+  transition: transform 0.6s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+}
+.chest-box-wrap.opened .chest-lid {
+  transform: rotateX(-95deg);
+}
+.chest-base {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  width: 140px;
+  height: 75px;
+  background: linear-gradient(#9a5420, #613612);
+  border: 4px solid #4a2c12;
+  border-radius: 8px 8px 18px 18px;
+  box-shadow: 0 10px 25px rgba(0,0,0,0.7);
+}
+.chest-lock {
+  position: absolute;
+  top: 48px;
+  left: 56px;
+  width: 28px;
+  height: 28px;
+  background: #ffc93c;
+  border: 3px solid #8a5a10;
+  border-radius: 8px;
+  box-shadow: 0 2px 6px rgba(0,0,0,0.4);
+  z-index: 5;
+}
+.chest-box-wrap.opened .chest-lock {
+  transform: translateY(20px) scale(0);
+  opacity: 0;
+}
+
+.chest-instruction {
+  margin-top: 25px;
+  color: #ffc93c;
+  font-size: 20px;
+  font-weight: bold;
+  text-shadow: 0 2px 8px rgba(0,0,0,0.8);
+  animation: pulseHint 1.2s infinite ease-in-out;
+}
+@keyframes pulseHint {
+  0%, 100% { opacity: 0.8; transform: scale(1); }
+  50% { opacity: 1; transform: scale(1.06); }
+}
+
+/* Card Reveal Container */
+.chest-reveal-card {
+  position: absolute;
+  top: 40px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  z-index: 10;
+}
+.pop-in {
+  animation: cardPopIn 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards;
+}
+@keyframes cardPopIn {
+  0% { transform: scale(0.2) translateY(80px); opacity: 0; }
+  100% { transform: scale(1) translateY(0); opacity: 1; }
+}
+
+.reveal-reward-item {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 12px;
+  padding: 24px 36px;
+  border-radius: 24px;
+  border: 4px solid var(--wood-dark);
+  box-shadow: 0 10px 30px rgba(0,0,0,0.6);
+}
+.reveal-reward-item.gold { background: linear-gradient(#ffeaa7, #fdcb6e); border-color: #d69e2e; }
+.reveal-reward-item.gems { background: linear-gradient(#55efc4, #00b894); border-color: #00cec9; }
+.big-reward-icon { width: 72px; height: 72px; }
+.reveal-title { font-size: 28px; font-weight: bold; color: #2d3436; text-shadow: 1px 1px 0 rgba(255,255,255,0.6); }
+
+.reveal-card-frame {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 16px 20px;
+  background: var(--cream);
+  border: 5px solid;
+  border-radius: 22px;
+  box-shadow: 0 12px 35px rgba(0,0,0,0.8);
+  min-width: 220px;
+}
+.new-card-badge {
+  background: #eb4d4b;
+  color: #fff;
+  font-size: 12px;
+  font-weight: bold;
+  padding: 2px 10px;
+  border-radius: 10px;
+  margin-bottom: 6px;
+  animation: flashBadge 1s infinite alternate;
+}
+@keyframes flashBadge {
+  0% { transform: scale(1); }
+  100% { transform: scale(1.1); }
+}
+.reveal-card-header {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 8px;
+}
+.reveal-card-header h4 { font-size: 20px; color: var(--wood-dark); }
+.rarity-pill { color: #fff; padding: 2px 8px; border-radius: 8px; font-size: 11px; font-weight: bold; }
+.reveal-card-count {
+  font-size: 24px;
+  font-weight: bold;
+  color: #27ae60;
+  margin-top: 8px;
+  text-shadow: 1px 1px 0 #fff;
+}
+.reveal-ability {
+  font-size: 12px;
+  font-weight: bold;
+  color: #d35400;
+  margin-top: 6px;
+  max-width: 220px;
+  text-align: center;
+}
+
+/* Rewards Summary Modal */
+.chest-rewards-summary {
+  width: 100%;
+  max-width: 440px;
+  z-index: 20;
+}
+.summary-box {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 20px;
+  background: var(--cream);
+  border: 5px solid var(--wood-dark);
+  border-radius: 24px;
+  box-shadow: 0 12px 35px rgba(0,0,0,0.85);
+  text-align: center;
+}
+.summary-box h2 { font-size: 24px; color: var(--wood-dark); margin-bottom: 12px; }
+.summary-currencies {
+  display: flex;
+  gap: 12px;
+  margin-bottom: 16px;
+}
+.sum-pill {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 14px;
+  border-radius: 14px;
+  font-size: 18px;
+  font-weight: bold;
+}
+.sum-pill.gold { background: #ffeaa7; color: #b7791f; border: 2px solid #d69e2e; }
+.sum-pill.gem { background: #dff9fb; color: #10ac84; border: 2px solid #1dd1a1; }
+.sum-pill .icon { width: 24px; height: 24px; }
+.summary-cards-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 8px;
+  width: 100%;
+  margin-bottom: 18px;
+}
+.summary-card-tile {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 8px 4px;
+  background: #fdfefe;
+  border: 3px solid;
+  border-radius: 12px;
+  font-size: 12px;
+}
+.summary-card-tile span { font-weight: bold; margin: 4px 0 2px; }
+.summary-card-tile b { color: #27ae60; font-size: 13px; }
+.collect-btn {
+  margin: 0;
+  width: 100%;
+  padding: 12px 0;
+  font-size: 22px;
+}
+

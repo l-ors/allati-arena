@@ -1,0 +1,31 @@
+{
+  "name": "clash-royale",
+  "version": "1.0.0",
+  "description": "Clash Royale-szerű kártyajáték, csak állatokkal. Új koncepciók, kártyák és interakciók.",
+  "main": "index.js",
+  "scripts": {
+    "start": "node server.js",
+    "dev": "node server.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/l-ors/allati-arena.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "type": "commonjs",
+  "bugs": {
+    "url": "https://github.com/l-ors/allati-arena/issues"
+  },
+  "homepage": "https://github.com/l-ors/allati-arena#readme",
+  "dependencies": {
+    "express": "^5.2.1",
+    "ws": "^8.22.0"
+  },
+  "devDependencies": {
+    "@capacitor/android": "^8.5.2",
+    "@capacitor/cli": "^8.5.2",
+    "@capacitor/core": "^8.5.2"
+  }
+}
